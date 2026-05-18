@@ -54,7 +54,7 @@ class Sensing:
             return "left"
         return None
 
-    def detect_move(self, all_hand_landmarks, frame_width) ->Moves | None:
+    def detect_move(self, all_hand_landmarks, frame_width) -> Moves | None:
         if not all_hand_landmarks:
             return None
         # --- PICK FLAG: requires exactly 2 hands, all fingers up on both ---
@@ -99,13 +99,13 @@ class Sensing:
                     self.draw.draw_landmarks(frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
                 move = self.detect_move(results.multi_hand_landmarks, w)
                 if move is not None:
-                    label = Moves.makeStr(move)
+                    label =Moves.makeStr(move)
             else:
                 prev_x = None
                 prev_time = None
             
-            cv2.putText(frame, label, (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
-            cv2.imshow("Gesture Recognition", frame)
+            cv2.putText(frame, label, (20, 60),cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
+            cv2.imshow("Gesture Recognition",frame)
             # ESC to exit
             if cv2.waitKey(1) & 0xFF == 27:
                 self.destroy()
