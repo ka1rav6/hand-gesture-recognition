@@ -18,8 +18,24 @@ class Sensing:
         prev_x = None
         prev_time = None
         slap_cooldown = 0
-    def fingers_up(self, hand_landmarks) -> list[int] | None: #Can bitmask if bhaiya asks for optimization
-        pass
+    def fingers_up(self, hand_landmarks) -> list[int]: #Can bitmask if bhaiya asks for optimization
+        """
+        Order:[Thumb,Index,Middle, Ring, Pinky]
+        Note Thumb is up if tip is to the LEFT  of the inner knuckle (right-hand, mirrored cam)
+        """
+        tips =[4, 8, 12, 16, 20]
+        fingers = []
+        if hand_landmarks.landmark[tips[0]].x< hand_landmarks.landmark[tips[0] - 1].x:
+            fingers.append(1)
+        else:
+            fingers.append(0)
+        for tip in tips[1:]:
+            if hand_landmarks.landmark[tip].y <hand_landmarks.landmark[tip - 2].y:
+                fingers.append(1)
+            else:
+                fingers.append(0)
+        return fingers
+    
     def thumb_pointing_down(self, hand_landmarks) -> bool:
         pass
     def all_fingers_horizontal(self, hand_landmarks, frame_width) -> str |None: #either direction or none
