@@ -42,7 +42,18 @@ class Sensing:
         return tip_y > base_y
     
     def all_fingers_horizontal(self, hand_landmarks, frame_width) -> str |None: #either direction or none
-        pass
+        tips  =[8, 12, 16, 20]
+        knuckles  = [5,9, 13, 17]
+        tip_x_avg= sum(hand_landmarks.landmark[i].x for i in tips) / 4
+        knuckle_x_avg =sum(hand_landmarks.landmark[i].x for i in knuckles) / 4
+        delta = tip_x_avg -knuckle_x_avg
+        threshold= 0.12
+        if delta >threshold:
+            return "right"
+        elif delta< -threshold:
+            return "left"
+        return None
+
     def detect_move(self, all_hand_landmarks, frame_width) ->Moves | None:
         pass
     def main_loop(self):
