@@ -83,7 +83,7 @@ class Sensing:
         if up == [1, 1, 1, 0, 0]:
             return Moves.SHOOT
         return None
-    def main_loop(self):
+    def run(self):
         while True:
             success, frame = self.cap.read()
             if not success:
