@@ -11,7 +11,9 @@ class Moves(Enum):
     PICK_FLAG = auto()
     DROP_FLAG = auto()
     DEFAULT = auto()
-        
+    @staticmethod        
+    def makeStr(move) -> str:
+        return MOVE_LABELS[move]
     
 MOVE_LABELS = { ##### Temp rn only to show on cam what it is
     Moves.JUMP_UP: "Jump Up!",
@@ -23,5 +25,3 @@ MOVE_LABELS = { ##### Temp rn only to show on cam what it is
     Moves.PICK_FLAG: "Pick Flag!",
     Moves.DROP_FLAG: "Drop Flag!",
 }
-def makeStr(move) -> str:
-    return MOVE_LABELS[move]

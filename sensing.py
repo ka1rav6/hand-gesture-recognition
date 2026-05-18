@@ -9,15 +9,15 @@ from utils.moves import Moves
 class Sensing:
     def __init__(self) -> None:
         # Initialize MediaPipe
-        mp_hands = mp.solutions.hands  # type: ignore
-        draw = mp.solutions.drawing_utils  # type: ignore
-        hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.9, min_tracking_confidence=0.9)
+        self.mp_hands = mp.solutions.hands  # type: ignore
+        self.draw = mp.solutions.drawing_utils  # type: ignore
+        self.hands = self.mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.9, min_tracking_confidence=0.9)
         # Open webcam
-        cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(0)
         # Variables to track motion for horizontal slap / turn detection
-        prev_x = None
-        prev_time = None
-        slap_cooldown = 0
+        self.prev_x = None
+        self.prev_time = None
+        self.slap_cooldown = 0
     def fingers_up(self, hand_landmarks) -> list[int]: #Can bitmask if bhaiya asks for optimization
         """
         Order:[Thumb,Index,Middle, Ring, Pinky]
@@ -84,4 +84,32 @@ class Sensing:
             return Moves.SHOOT
         return None
     def main_loop(self):
-        pass
+        while True:
+            success, frame = self.cap.read()
+            if not success:
+                break
+            frame = cv2.flip(frame, 1)
+            h, w, i = frame.shape
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = self.hands.process(rgb)
+            label = "No Gesture"
+            current_time = time.time()
+            if results.multi_hand_landmarks:
+                for hand_landmarks in results.multi_hand_landmarks:
+                    self.draw.draw_landmarks(frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
+                move = self.detect_move(results.multi_hand_landmarks, w)
+                if move is not None:
+                    label = Moves.makeStr(move)
+            else:
+                prev_x = None
+                prev_time = None
+            
+            cv2.putText(frame, label, (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
+            cv2.imshow("Gesture Recognition", frame)
+            # ESC to exit
+            if cv2.waitKey(1) & 0xFF == 27:
+                self.destroy()
+                break
+    def destroy(self):
+        self.cap.release()
+        cv2.destroyAllWindows()
