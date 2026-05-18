@@ -55,6 +55,33 @@ class Sensing:
         return None
 
     def detect_move(self, all_hand_landmarks, frame_width) ->Moves | None:
-        pass
+        if not all_hand_landmarks:
+            return None
+        # --- PICK FLAG: requires exactly 2 hands, all fingers up on both ---
+        if len(all_hand_landmarks) == 2:
+            both_open = all(self.fingers_up(lm) == [1, 1, 1, 1, 1] or self.fingers_up(lm) == [0,1,1,1,1] for lm in all_hand_landmarks)
+            if both_open:
+                return Moves.PICK_FLAG
+        # Single-hand gestures — use the first (most confident) hand
+        lm = all_hand_landmarks[0]
+        up = self.fingers_up(lm)
+        four_fingers_up = up[1:] 
+        four_fingers_down = all(f == 0 for f in four_fingers_up)
+        if up == [0, 0, 0, 0, 0]:
+            return Moves.DROP_FLAG
+        if up == [1, 0, 0, 0, 0]:
+            return Moves.JUMP_UP
+        if four_fingers_down and self.thumb_pointing_down(lm):
+            return Moves.ROLL_UNDER
+        if up == [1, 1, 1, 1, 1]:
+            return Moves.STOP
+        direction = self.all_fingers_horizontal(lm, frame_width)
+        if direction == "left":
+            return Moves.TURN_LEFT
+        if direction == "right":
+            return Moves.TURN_RIGHT
+        if up == [1, 1, 1, 0, 0]:
+            return Moves.SHOOT
+        return None
     def main_loop(self):
         pass
