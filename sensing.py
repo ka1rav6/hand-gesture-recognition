@@ -37,7 +37,10 @@ class Sensing:
         return fingers
     
     def thumb_pointing_down(self, hand_landmarks) -> bool:
-        pass
+        tip_y  = hand_landmarks.landmark[4].y
+        base_y = hand_landmarks.landmark[2].y 
+        return tip_y > base_y
+    
     def all_fingers_horizontal(self, hand_landmarks, frame_width) -> str |None: #either direction or none
         pass
     def detect_move(self, all_hand_landmarks, frame_width) ->Moves | None:
