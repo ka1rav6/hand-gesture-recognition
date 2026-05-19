@@ -15,9 +15,9 @@ class Sensing:
         # Open webcam
         self.cap = cv2.VideoCapture(0)
         # Variables to track motion for horizontal slap / turn detection
-        self.prev_x = None
-        self.prev_time = None
-        self.slap_cooldown = 0
+        # self.prev_x = None
+        # self.prev_time = None
+        # self.slap_cooldown = 0
     def fingers_up(self, hand_landmarks) -> list[int]: #Can bitmask if bhaiya asks for optimization
         """
         Order:[Thumb,Index,Middle, Ring, Pinky]
@@ -37,9 +37,9 @@ class Sensing:
         return fingers
     
     def thumb_pointing_down(self, hand_landmarks) -> bool:
-        tip_y  = hand_landmarks.landmark[4].y
-        base_y = hand_landmarks.landmark[2].y 
-        return tip_y > base_y
+        tip_y = hand_landmarks.landmark[4].y
+        base_y =hand_landmarks.landmark[1].y 
+        return tip_y >base_y
     
     def all_fingers_horizontal(self, hand_landmarks, frame_width) -> str |None: #either direction or none
         tips  =[8, 12, 16, 20]
@@ -57,7 +57,6 @@ class Sensing:
     def detect_move(self, all_hand_landmarks, frame_width) -> Moves | None:
         if not all_hand_landmarks:
             return None
-        # --- PICK FLAG: requires exactly 2 hands, all fingers up on both ---
         if len(all_hand_landmarks) == 2:
             both_open = all(self.fingers_up(lm) == [1, 1, 1, 1, 1] or self.fingers_up(lm) == [0,1,1,1,1] for lm in all_hand_landmarks)
             if both_open:
@@ -71,7 +70,7 @@ class Sensing:
             return Moves.DROP_FLAG
         if up == [1, 0, 0, 0, 0]:
             return Moves.JUMP_UP
-        if four_fingers_down and self.thumb_pointing_down(lm):
+        if up == [0, 0, 0, 0, 1]:
             return Moves.ROLL_UNDER
         if up == [1, 1, 1, 1, 1]:
             return Moves.STOP
@@ -80,7 +79,7 @@ class Sensing:
             return Moves.TURN_LEFT
         if direction == "right":
             return Moves.TURN_RIGHT
-        if up == [1, 1, 1, 0, 0]:
+        if up == [1, 1, 1, 0, 0] or up == [0, 1, 1, 0, 0]:
             return Moves.SHOOT
         return None
     def run(self):
@@ -93,16 +92,16 @@ class Sensing:
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             results = self.hands.process(rgb)
             label = "No Gesture"
-            current_time = time.time()
+            # self.current_time = time.time()
             if results.multi_hand_landmarks:
                 for hand_landmarks in results.multi_hand_landmarks:
                     self.draw.draw_landmarks(frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
                 move = self.detect_move(results.multi_hand_landmarks, w)
                 if move is not None:
                     label =Moves.makeStr(move)
-            else:
-                prev_x = None
-                prev_time = None
+            # else:
+            #     self.prev_x = None
+            #     self.prev_time = None
             
             cv2.putText(frame, label, (20, 60),cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
             cv2.imshow("Gesture Recognition",frame)
